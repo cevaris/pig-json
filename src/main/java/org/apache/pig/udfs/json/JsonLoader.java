@@ -111,7 +111,7 @@ public class JsonLoader extends LoadFunc {
     }
 
     protected Tuple parseStringToTuple(String line) throws IOException {
-    	System.out.println("parseStringToTuple" + " " + line);
+//    	System.out.println("parseStringToTuple" + " " + line);
         try {
             Map<String, Object> values = new HashMap<String, Object>();
             JsonNode node = mapper.readTree(line);
@@ -130,7 +130,7 @@ public class JsonLoader extends LoadFunc {
     }
 
     private void flatten_value(JsonNode node, Map<String, Object> values) {
-    	System.out.println("flatten_value" + " " + node.toString());
+//    	System.out.println("flatten_value" + " " + node.toString());
         Iterator<String> keys = node.getFieldNames();
         Iterator<JsonNode> nodes = node.getElements();
         while (keys.hasNext()) {
@@ -156,7 +156,7 @@ public class JsonLoader extends LoadFunc {
     }
 
     private void flatten_array(JsonNode value, DataBag bag) {
-    	System.out.println("flatten_array" + " " + value);
+//    	System.out.println("flatten_array" + " " + value);
         if(value.isArray()) {
             ArrayNode array = (ArrayNode)value;
             DataBag b = DefaultBagFactory.getInstance().newDefaultBag();
