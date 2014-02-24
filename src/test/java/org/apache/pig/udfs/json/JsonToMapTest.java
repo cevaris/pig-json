@@ -1,4 +1,4 @@
-package epic.colorado.edu.udfs;
+package org.apache.pig.udfs.json;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -19,7 +19,7 @@ import org.junit.Test;
 
 import junit.framework.TestCase;
 
-public class JsonLoaderTest extends TestCase {
+public class JsonToMapTest extends TestCase {
 	
 	private ExecType execType = ExecType.LOCAL;
 //    private MiniCluster cluster = MiniCluster.buildCluster();
@@ -57,23 +57,14 @@ public class JsonLoaderTest extends TestCase {
     @Test
     public void test_JsonLoader_Parses_Deeply_Nested_Json_Field() throws IOException {
         pigContext.connect();
-        pig.registerQuery("a = LOAD '" + INPUT_FILE + "' using epic.colorado.edu.udfs.JsonLoader() " +
-                "as (json:map[]);");
-        
-//        pig.registerQuery("b = foreach a generate flatten(json#'menu') as menu;");
-//        pig.registerQuery("c = foreach b generate flatten(menu#'popup') as popup;");
-//        pig.registerQuery("d = foreach c generate flatten(popup#'menuitem') as menuitem;");
-//        pig.registerQuery("e = foreach d generate flatten(menuitem#'value') as val;");
-        
-        
-        pig.registerQuery("b = foreach a generate FLATTEN(json#'entities') as entities;");
-        pig.registerQuery("c = foreach b generate flatten(entities#'urls') as urls;");
-        pig.registerQuery("d = foreach c generate flatten(urls#'url') as url;");
-////        pig.registerQuery("e = foreach d generate flatten(menuitem#'value') as val;");
-        
+        pig.registerQuery("a = LOAD '" + INPUT_FILE + "' AS (text:chararray);");
+        pig.registerQuery("b = foreach a generate FLATTEN(epic.colorado.edu.udfs.JsonToMap(text)) as json;");
+        pig.registerQuery("c = foreach b generate FLATTEN(json#'entities') as entities;");
+        pig.registerQuery("d = foreach c generate flatten(entities#'urls') as urls;");
+        pig.registerQuery("e = foreach d generate flatten(urls#'url') as url;");
         
         List<Tuple> expectedResults = buildExpectedNestedJsonResults();
-        Iterator<Tuple> iterator = pig.openIterator("d");
+        Iterator<Tuple> iterator = pig.openIterator("e");
         int counter = 0;
         while (iterator.hasNext()) {
 //            assertEquals(expectedResults.get(counter++).toString(), iterator.next().toString());

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<jardesc>
+    <jar path="udfs/target/pig-json.jar"/>
+    <options buildIfNeeded="true" compress="true" descriptionLocation="/udfs/pig-json.jardesc" exportErrors="true" exportWarnings="true" includeDirectoryEntries="false" overwrite="true" saveDescription="true" storeRefactorings="false" useSourceFolders="false"/>
+    <storedRefactorings deprecationInfo="true" structuralOnly="false"/>
+    <selectedProjects/>
+    <manifest generateManifest="true" manifestLocation="" manifestVersion="1.0" reuseManifest="false" saveManifest="false" usesManifest="true">
+        <sealing sealJar="false">
+            <packagesToSeal/>
+            <packagesToUnSeal/>
+        </sealing>
+    </manifest>
+    <selectedElements exportClassFiles="true" exportJavaFiles="false" exportOutputFolder="false">
+        <folder path="/udfs/src"/>
+        <javaElement handleIdentifier="=udfs/src\/main\/java"/>
+        <file path="/udfs/.project"/>
+        <file path="/udfs/.classpath"/>
+        <file path="/udfs/.gitignore"/>
+        <javaElement handleIdentifier="=udfs/src\/test\/java"/>
+        <file path="/udfs/pom.xml"/>
+        <file path="/udfs/.DS_Store"/>
+    </selectedElements>
+</jardesc>

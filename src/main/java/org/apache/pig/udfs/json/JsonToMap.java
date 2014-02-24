@@ -16,19 +16,10 @@
  * limitations under the License.
  */
 
-package epic.colorado.edu.udfs;
-
-import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapreduce.InputFormat;
-import org.apache.hadoop.mapreduce.Job;
-import org.apache.hadoop.mapreduce.RecordReader;
-import org.apache.hadoop.mapreduce.lib.input.LineRecordReader;
-import org.apache.pig.LoadFunc;
+package org.apache.pig.udfs.json;
+import org.apache.pig.EvalFunc;
 import org.apache.pig.PigException;
 import org.apache.pig.backend.executionengine.ExecException;
-import org.apache.pig.backend.hadoop.executionengine.mapReduceLayer.PigFileInputFormat;
-import org.apache.pig.backend.hadoop.executionengine.mapReduceLayer.PigSplit;
-import org.apache.pig.backend.hadoop.executionengine.mapReduceLayer.PigTextInputFormat;
 import org.apache.pig.data.DataBag;
 import org.apache.pig.data.DefaultBagFactory;
 import org.apache.pig.data.Tuple;
@@ -74,42 +65,34 @@ import java.util.Map;
  *  e = foreach d generate flatten(men#'value') as val;
  *
  */
-public class JsonLoader extends LoadFunc {
+public class JsonToMap extends EvalFunc<Tuple> {
     private static final TupleFactory tupleFactory = TupleFactory.getInstance();
     private ObjectMapper mapper;
-    private LineRecordReader in = null;
 
-    public JsonLoader() {
+    public JsonToMap() {
         super();
         mapper = new ObjectMapper();
     }
 
-    @SuppressWarnings("unchecked")
-    @Override
-    public InputFormat getInputFormat() throws IOException {
-        return new PigTextInputFormat();
+    public Tuple exec(Tuple input) throws IOException {
+    	if (input == null || input.size() == 0)
+    		return null;
+		
+    	try{
+			String line = (String)input.get(0);
+			if (line.length() > 0) {
+	            Tuple t = parseStringToTuple(line);
+	            if (t != null) {
+	                return t;
+	            }
+	        }
+	        return null;
+		}catch(Exception e){
+			throw new IOException(e);
+		}
+    	
     }
-
-    @Override
-    public Tuple getNext() throws IOException {
-        boolean notDone = in.nextKeyValue();
-        if (!notDone) {
-            return null;
-        }
-        Text val = in.getCurrentValue();
-        if (val == null) {
-            return null;
-        }
-        String line = val.toString();
-        if (line.length() > 0) {
-            Tuple t = parseStringToTuple(line);
-            if (t != null) {
-                return t;
-            }
-        }
-        return null;
-    }
-
+    
     protected Tuple parseStringToTuple(String line) throws IOException {
     	System.out.println("parseStringToTuple" + " " + line);
         try {
@@ -175,14 +158,14 @@ public class JsonLoader extends LoadFunc {
         }
     }
 
-    @SuppressWarnings("unchecked")
-    @Override
-    public void prepareToRead(RecordReader reader, PigSplit split) throws IOException {
-        in = (LineRecordReader) reader;
-    }
-
-    @Override
-    public void setLocation(String location, Job job) throws IOException {
-        PigFileInputFormat.setInputPaths(job, location);
-    }
+//    @SuppressWarnings("unchecked")
+//    @Override
+//    public void prepareToRead(RecordReader reader, PigSplit split) throws IOException {
+//        in = (LineRecordReader) reader;
+//    }
+//
+//    @Override
+//    public void setLocation(String location, Job job) throws IOException {
+//        PigFileInputFormat.setInputPaths(job, location);
+//    }
 }
