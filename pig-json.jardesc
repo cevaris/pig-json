@@ -13,12 +13,14 @@
     <selectedElements exportClassFiles="true" exportJavaFiles="false" exportOutputFolder="false">
         <folder path="/pig-json/src"/>
         <file path="/pig-json/.DS_Store"/>
+        <file path="/pig-json/pig-json.jardesc"/>
         <javaElement handleIdentifier="=pig-json/src\/main\/java"/>
         <file path="/pig-json/pom.xml"/>
         <javaElement handleIdentifier="=pig-json/src\/test\/java"/>
         <file path="/pig-json/.classpath"/>
         <folder path="/pig-json/target"/>
         <file path="/pig-json/.project"/>
+        <javaElement handleIdentifier="=pig-json/src\/test\/resources"/>
         <file path="/pig-json/.gitignore"/>
     </selectedElements>
 </jardesc>
