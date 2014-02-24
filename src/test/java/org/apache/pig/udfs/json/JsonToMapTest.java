@@ -1,8 +1,12 @@
 package org.apache.pig.udfs.json;
 
+import java.io.BufferedReader;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.PrintStream;
+import java.net.URISyntaxException;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -22,27 +26,33 @@ import junit.framework.TestCase;
 public class JsonToMapTest extends TestCase {
 	
 	private ExecType execType = ExecType.LOCAL;
-//    private MiniCluster cluster = MiniCluster.buildCluster();
     private static PigServer pig;
-    private static final String datadir = "/data/pig/";
+    private static final String datadir = "/tmp/";
     private PigContext pigContext = new PigContext(execType, new Properties());
     
-//    private String INPUT_FILE = datadir + "originput";
     private String INPUT_FILE = datadir + "tweets.json";
 
     @Before
-    public void setUp() throws IOException {
-//        pig = new PigServer(execType, cluster.getProperties());
+    public void setUp() throws IOException, URISyntaxException {
     	pig = new PigServer(execType);
-//        createJsonInputFile();
+        createJsonInputFile();
     }
 
-    private void createJsonInputFile() throws IOException {
-    	String json = "{\"thing\":\"value\",\"menu\":{\"id\":\"file\",\"value\":\"File\",\"popup\":{\"menuitem\": [{\"value\":323,\"onclick\":\"CreateNewDoc()\"},{\"value\":\"Open\",\"onclick\":\"OpenDoc()\"}, {\"value\":\"Close\",\"onclick\":\"CloseDoc()\"}]}}}";
+    private void createJsonInputFile() throws IOException, URISyntaxException{
+    	InputStream input = getClass().getClassLoader().getResourceAsStream("tweets.json");
+    	BufferedReader in = new BufferedReader(new InputStreamReader(input));
+
+    	String line = null;
+    	StringBuilder json = new StringBuilder();
+    	while((line = in.readLine()) != null) {
+    		json.append(line);
+    		json.append("\n");
+    	}
+    	
     	PrintStream out = null;
     	try {
     	    out = new PrintStream(new FileOutputStream(INPUT_FILE));
-    	    out.print(json);
+    	    out.print(json.toString());
     	}
     	finally {
     	    if (out != null) out.close();
@@ -58,26 +68,30 @@ public class JsonToMapTest extends TestCase {
     public void test_JsonLoader_Parses_Deeply_Nested_Json_Field() throws IOException {
         pigContext.connect();
         pig.registerQuery("a = LOAD '" + INPUT_FILE + "' AS (text:chararray);");
-        pig.registerQuery("b = foreach a generate FLATTEN(epic.colorado.edu.udfs.JsonToMap(text)) as json;");
+        pig.registerQuery("b = foreach a generate FLATTEN(org.apache.pig.udfs.json.JsonToMap(text)) as json;");
         pig.registerQuery("c = foreach b generate FLATTEN(json#'entities') as entities;");
         pig.registerQuery("d = foreach c generate flatten(entities#'urls') as urls;");
         pig.registerQuery("e = foreach d generate flatten(urls#'url') as url;");
         
         List<Tuple> expectedResults = buildExpectedNestedJsonResults();
         Iterator<Tuple> iterator = pig.openIterator("e");
-        int counter = 0;
         while (iterator.hasNext()) {
-//            assertEquals(expectedResults.get(counter++).toString(), iterator.next().toString());
-        	System.out.println(iterator.next().toString());
+        	Tuple expected = expectedResults.remove(0);
+        	Tuple current = iterator.next();
+            assertEquals(expected.toString(), current.toString());
+        	System.out.println(current);
         }
     }
 
     private List<Tuple> buildExpectedNestedJsonResults() {
         List<Tuple> expectedResults = new LinkedList<Tuple>();
         TupleFactory tupleFactory = TupleFactory.getInstance();
-        expectedResults.add(tupleFactory.newTuple("New"));
-        expectedResults.add(tupleFactory.newTuple("Open"));
-        expectedResults.add(tupleFactory.newTuple("Close"));
+        expectedResults.add(tupleFactory.newTuple("http://t.co/IOleSP7Csz"));
+        expectedResults.add(tupleFactory.newTuple("http://t.co/IOleSP7Csz"));
+        expectedResults.add(tupleFactory.newTuple("http://t.co/IOleSP7Csz"));
+        expectedResults.add(tupleFactory.newTuple("http://t.co/UFqdbQcAmk"));
+        expectedResults.add(tupleFactory.newTuple("https://t.co/UTohcBofKL"));
+        expectedResults.add(tupleFactory.newTuple("http://t.co/mloDH9N6d4"));
         return expectedResults;
     }
 
