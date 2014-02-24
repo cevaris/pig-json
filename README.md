@@ -1,7 +1,7 @@
 pig-json
 ========
 
-JSON parser/loader for &lt; Pig 0.10.0
+JSON parser/loader for Pig &lt; 0.10.0
 
 Sourced from here
 [https://github.com/mmay/PigJsonLoader](https://github.com/mmay/PigJsonLoader)
