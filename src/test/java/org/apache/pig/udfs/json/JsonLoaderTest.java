@@ -34,8 +34,9 @@ public class JsonLoaderTest extends TestCase {
 
     @Before
     public void setUp() throws IOException, URISyntaxException {
+    	createJsonInputFile();
     	pig = new PigServer(execType);
-        createJsonInputFile();
+        
     }
 
     private void createJsonInputFile() throws IOException, URISyntaxException{
@@ -53,6 +54,7 @@ public class JsonLoaderTest extends TestCase {
     	try {
     	    out = new PrintStream(new FileOutputStream(INPUT_FILE));
     	    out.print(json.toString());
+    	    out.close();
     	}
     	finally {
     	    if (out != null) out.close();
@@ -67,7 +69,7 @@ public class JsonLoaderTest extends TestCase {
     @Test
     public void test_JsonLoader_Parses_Deeply_Nested_Json_Field() throws IOException {
         pigContext.connect();
-        pig.registerQuery("a = LOAD '" + INPUT_FILE + "' using org.apache.pig.udfs.json.JsonLoader() " +
+        pig.registerQuery("a = LOAD '" + INPUT_FILE + "' using org.apache.cassandra.hadoop.pig.json.JsonLoader() " +
                 "as (json:map[]);");
 
         pig.registerQuery("b = foreach a generate FLATTEN(json#'entities') as entities;");

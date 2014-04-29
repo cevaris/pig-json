@@ -68,7 +68,7 @@ public class JsonToMapTest extends TestCase {
     public void test_JsonLoader_Parses_Deeply_Nested_Json_Field() throws IOException {
         pigContext.connect();
         pig.registerQuery("a = LOAD '" + INPUT_FILE + "' AS (text:chararray);");
-        pig.registerQuery("b = foreach a generate FLATTEN(org.apache.pig.udfs.json.JsonToMap(text)) as json;");
+        pig.registerQuery("b = foreach a generate FLATTEN(org.apache.cassandra.hadoop.pig.json.JsonToMap(text)) as json;");
         pig.registerQuery("c = foreach b generate FLATTEN(json#'entities') as entities;");
         pig.registerQuery("d = foreach c generate flatten(entities#'urls') as urls;");
         pig.registerQuery("e = foreach d generate flatten(urls#'url') as url;");

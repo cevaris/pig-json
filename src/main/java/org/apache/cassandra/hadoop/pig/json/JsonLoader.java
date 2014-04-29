@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package org.apache.pig.udfs.json;
+package org.apache.cassandra.hadoop.pig.json;
 
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.InputFormat;
