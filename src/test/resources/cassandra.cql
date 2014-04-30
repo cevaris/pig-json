@@ -1,8 +1,7 @@
-DROP KEYSPACE emp_table;
-CREATE KEYSPACE emp_table
+CREATE KEYSPACE test_keyspace
   WITH replication = {'class': 'SimpleStrategy', 'replication_factor' : 1};
 
-USE emp_table;
+USE test_keyspace;
 
 CREATE TABLE emp(
   id int,

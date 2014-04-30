@@ -36,7 +36,6 @@ public class CqlStorageTest {
     }
 
 	private void setupDB() {
-//		System.out.println(URLClassLoader.getSystemResourceAsStream("cassandra.cql").toString());
 		File file = new File("src/test/resources/cassandra.cql");
 		Process p;
 		StringBuilder output = new StringBuilder();
@@ -67,22 +66,20 @@ public class CqlStorageTest {
 
 	@Test
 	public void testCassandraQuery() throws IOException {
-//		pigContext.connect();
-////        pig.registerQuery("a = LOAD '" + INPUT_FILE + "' using org.apache.cassandra.hadoop.pig.json.JsonLoader() " +
-////                "as (json:map[]);");
-//
+		pigContext.connect();
+        pig.registerQuery("employees = LOAD 'cql://test_keyspace/emp' USING org.apache.cassandra.hadoop.pig.redis.CqlStorage();");
 //        pig.registerQuery("b = foreach a generate FLATTEN(json#'entities') as entities;");
 //        pig.registerQuery("c = foreach b generate flatten(entities#'urls') as urls;");
 //        pig.registerQuery("d = foreach c generate flatten(urls#'url') as url;");
-//        
+        
 //        List<Tuple> expectedResults = buildExpectedNestedJsonResults();
-//        Iterator<Tuple> iterator = pig.openIterator("d");
-//        while (iterator.hasNext()) {
+        Iterator<Tuple> iterator = pig.openIterator("employees");
+        while (iterator.hasNext()) {
 //        	Tuple expected = expectedResults.remove(0);
-//        	Tuple current = iterator.next();
+        	Tuple current = iterator.next();
 //            assertEquals(expected.toString(), current.toString());
-//        	System.out.println(current);
-//        }
+        	System.out.println(current);
+        }
     }
 
     private List<Tuple> buildExpectedNestedJsonResults() {
