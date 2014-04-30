@@ -64,7 +64,7 @@ public class CqlStorageTest {
 		System.out.println("Created Database\n"+output.toString());
 	}
 
-	@Test
+//	@Test
 	public void testCassandraQuery() throws IOException {
 		pigContext.connect();
         pig.registerQuery("employees = LOAD 'cql://test_keyspace/emp' USING org.apache.cassandra.hadoop.pig.redis.CqlStorage();");
