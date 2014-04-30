@@ -2,7 +2,9 @@ package org.apache.cassandra.hadoop.pig.redis;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -15,7 +17,7 @@ public class RedisClient {
 	private String referenceSet;
 	private Jedis client;
 	
-	Pattern pattern = Pattern.compile(
+	private static Pattern pattern = Pattern.compile(
             ":(.*?)=>\"(.*?)\"",
             (Pattern.MULTILINE | Pattern.CASE_INSENSITIVE | Pattern.DOTALL));
 
@@ -25,7 +27,7 @@ public class RedisClient {
 		this.client = new Jedis(host,port);
 	}
 	
-	private String[] parseRubyHash(String hash){
+	public static String[] parseRubyHash(String hash){
 		String[] result = new String[2];
 		//apply the pattern to our string content
 	    Matcher matcher = pattern.matcher(hash);
@@ -37,14 +39,9 @@ public class RedisClient {
 		return result;
 		
 	}
-	
-	public void all() {
-		for( String s : this.client.zrange(this.referenceSet, 0, -1)){
-			System.out.println(Arrays.toString(parseRubyHash(s)));
-		}
-		
+	public Set<String> all(){
+		return client.zrange(referenceSet, 0, -1);
 	}
-	
 	
 
 }

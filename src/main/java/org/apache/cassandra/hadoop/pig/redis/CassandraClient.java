@@ -12,6 +12,7 @@ import com.netflix.astyanax.Keyspace;
 import com.netflix.astyanax.connectionpool.NodeDiscoveryType;
 import com.netflix.astyanax.connectionpool.OperationResult;
 import com.netflix.astyanax.connectionpool.exceptions.ConnectionException;
+import com.netflix.astyanax.connectionpool.exceptions.NotFoundException;
 import com.netflix.astyanax.connectionpool.impl.ConnectionPoolConfigurationImpl;
 import com.netflix.astyanax.connectionpool.impl.ConnectionPoolType;
 import com.netflix.astyanax.connectionpool.impl.CountingConnectionPoolMonitor;
@@ -35,27 +36,33 @@ import com.netflix.astyanax.thrift.ThriftFamilyFactory;
 
 public class CassandraClient {
 	
+	private String seeds = "127.0.0.1:9160";
 	private String keyspace;
 	private String columnFamily;
 	private ColumnFamily<String, String> CF_TWEETS;
 	
-//	private ColumnFamily<String, String> CF_TWEETS = ColumnFamily
-//            .newColumnFamily(
-//            		this.columnFamily,
-//            		StringSerializer.get(),
-//                    StringSerializer.get());
+	
+	private Keyspace ksClient;
+	
 	
 	public CassandraClient(String keyspace, String columnFamily) {
 		this.keyspace = keyspace;
 		this.columnFamily = columnFamily;
-
-		CF_TWEETS = ColumnFamily.newColumnFamily(
-    		this.columnFamily,
-    		StringSerializer.get(),
-            StringSerializer.get());
+		init();
 	}
 	
-	public void selectOne(String rowKey, String name){
+	public CassandraClient(String seeds, String keyspace, String columnFamily) {
+		this.seeds = seeds;
+		this.keyspace = keyspace;
+		this.columnFamily = columnFamily;
+		init();
+	}
+	
+	private void init(){
+		CF_TWEETS = ColumnFamily.newColumnFamily(
+	    		this.columnFamily,
+	    		StringSerializer.get(),
+	            StringSerializer.get());
 		
 		AstyanaxContext<Keyspace> ctx = new AstyanaxContext.Builder()
 		.forKeyspace(this.keyspace)
@@ -66,51 +73,39 @@ public class CassandraClient {
 		.withConnectionPoolConfiguration(new ConnectionPoolConfigurationImpl("CassandraClientPool")
 	        .setPort(9160)
 	        .setMaxConnsPerHost(3)
-	        .setSeeds("127.0.0.1:9160")
+	        .setSeeds(this.seeds)
 	     )
 	    .withConnectionPoolMonitor(new CountingConnectionPoolMonitor())
 		.buildKeyspace(ThriftFamilyFactory.getInstance());
 		ctx.start();
+		ksClient = ctx.getClient();
+	}
 	
-		Keyspace keyspace = ctx.getClient();
+	public String selectOne(String rowKey, String name){
 		
 		Column<String> result;
 		try {
-			result = keyspace.prepareQuery(CF_TWEETS)
+			result = this.ksClient.prepareQuery(CF_TWEETS)
 				    .getKey(rowKey)
 				    .getColumn(name)
 				    .execute().getResult();
 			String value = result.getStringValue();
-			System.out.println(String.format("%s[%s][%s] = %s", this.columnFamily, rowKey, name, value));
+//			System.out.println(String.format("%s[%s][%s] = %s", this.columnFamily, rowKey, name, value));
+			return value;
+		} catch (NotFoundException e)  {
+			System.err.println(String.format("Could not find %s %s", rowKey, name));
 		} catch (ConnectionException e) {
 			e.printStackTrace();
-		}
-		
+		} 
+		return null;
 	}
 
 	public void selectAll(){
 		
-		AstyanaxContext<Keyspace> ctx = new AstyanaxContext.Builder()
-			.forKeyspace(this.keyspace)
-			.withAstyanaxConfiguration(new AstyanaxConfigurationImpl()      
-		        .setDiscoveryType(NodeDiscoveryType.RING_DESCRIBE)
-		        .setConnectionPoolType(ConnectionPoolType.TOKEN_AWARE)
-		    )
-			.withConnectionPoolConfiguration(new ConnectionPoolConfigurationImpl("CassandraClientPool")
-		        .setPort(9160)
-		        .setMaxConnsPerHost(3)
-		        .setSeeds("127.0.0.1:9160")
-		     )
-		    .withConnectionPoolMonitor(new CountingConnectionPoolMonitor())
-			.buildKeyspace(ThriftFamilyFactory.getInstance());
-		ctx.start();
-
-		Keyspace keyspace = ctx.getClient();
-
 		
 		try {
 		    OperationResult<CqlResult<String, String>> result
-		        = keyspace.prepareQuery(CF_TWEETS)
+		        = this.ksClient.prepareQuery(CF_TWEETS)
 		            .withCql("SELECT * FROM "+this.columnFamily+";")
 		            .execute();
 		    for (Row<String, String> row : result.getResult().getRows()) {
@@ -120,13 +115,10 @@ public class CassandraClient {
 		    	for(String cname: cnames.getColumnNames()){
 		    		System.out.println(cname);
 		    	}
-		    	System.out.println("\n");
-//		    	System.out.println(row.getColumns().getIntegerValue("id", null));
-//		    	System.out.println(row.getColumns().getStringValue("name", null));
 		    }
 		} catch (ConnectionException e) {
 			e.printStackTrace();
-		}
+		} 
 	}
 
 }
