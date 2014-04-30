@@ -40,12 +40,6 @@ public class CassandraClient {
 	
 	public void getSchema(){
 		
-		ColumnFamily<String, String> CF_EMP =
-			new ColumnFamily<String, String>(
-				this.columnFamily, 
-			    StringSerializer.get(), 
-		    	StringSerializer.get());
-		
 		AstyanaxContext<Keyspace> ctx = new AstyanaxContext.Builder()
 		.forKeyspace(this.keyspace)
 		.withAstyanaxConfiguration(new AstyanaxConfigurationImpl()      
@@ -90,11 +84,11 @@ public class CassandraClient {
 	}
 	public void selectAll(){
 		
-//		ColumnFamily<Integer, String> CF_EMP = ColumnFamily
-//	            .newColumnFamily(
-//	            		this.columnFamily,
-//	            		IntegerSerializer.get(),
-//	                    StringSerializer.get());
+		ColumnFamily<Integer, String> CF_EMP = ColumnFamily
+	            .newColumnFamily(
+	            		this.columnFamily,
+	            		IntegerSerializer.get(),
+	                    StringSerializer.get());
 		
 		AstyanaxContext<Keyspace> ctx = new AstyanaxContext.Builder()
 			.forKeyspace(this.keyspace)
