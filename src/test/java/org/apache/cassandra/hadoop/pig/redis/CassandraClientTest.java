@@ -6,16 +6,17 @@ import org.junit.Test;
 
 public class CassandraClientTest {
 
-	@Test
+//	@Test
 	public void testSelectAll() {
-		CassandraClient client = new CassandraClient("test_keyspace","emp");
+		CassandraClient client = new CassandraClient("test_keyspace","tweets");
 		client.selectAll();
 	}
 	
-//	@Test
-//	public void testGetSchema() {
-//		CassandraClient client = new CassandraClient("test_keyspace","tweets");
-//		client.getSchema();
-//	}
+	@Test
+	public void testSelectOne() {
+		CassandraClient client = new CassandraClient("test_keyspace","tweets");
+		client.selectOne("jeffcoflood:2013260:5", "379809860197814272");
+	}
+	
 
 }
