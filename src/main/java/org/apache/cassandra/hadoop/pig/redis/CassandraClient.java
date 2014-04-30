@@ -3,6 +3,7 @@ package org.apache.cassandra.hadoop.pig.redis;
 import java.util.List;
 
 import org.apache.cassandra.db.migration.avro.CfDef;
+import org.apache.cassandra.db.migration.avro.ColumnDef;
 import org.apache.cassandra.db.migration.avro.KsDef;
 
 import com.netflix.astyanax.AstyanaxContext;
@@ -13,6 +14,7 @@ import com.netflix.astyanax.connectionpool.exceptions.ConnectionException;
 import com.netflix.astyanax.connectionpool.impl.ConnectionPoolConfigurationImpl;
 import com.netflix.astyanax.connectionpool.impl.ConnectionPoolType;
 import com.netflix.astyanax.connectionpool.impl.CountingConnectionPoolMonitor;
+import com.netflix.astyanax.ddl.ColumnDefinition;
 import com.netflix.astyanax.ddl.ColumnFamilyDefinition;
 import com.netflix.astyanax.ddl.FieldMetadata;
 import com.netflix.astyanax.ddl.KeyspaceDefinition;
@@ -38,6 +40,12 @@ public class CassandraClient {
 	
 	public void getSchema(){
 		
+		ColumnFamily<String, String> CF_EMP =
+			new ColumnFamily<String, String>(
+				this.columnFamily, 
+			    StringSerializer.get(), 
+		    	StringSerializer.get());
+		
 		AstyanaxContext<Keyspace> ctx = new AstyanaxContext.Builder()
 		.forKeyspace(this.keyspace)
 		.withAstyanaxConfiguration(new AstyanaxConfigurationImpl()      
@@ -60,10 +68,18 @@ public class CassandraClient {
 			keyDef = keyspace.describeKeyspace();
 			
 			
-			ColumnFamilyDefinition cf = keyDef.getColumnFamily(this.columnFamily);
+			ColumnFamilyDefinition cf = keyDef.getColumnFamily(CF_EMP.getName());
 			System.out.println( "|"+ cf.getName() + "|");
-			for(FieldMetadata meta : cf.getFieldsMetadata()){
-				System.out.println(meta.getName() + " " + meta.getType());
+//			for(String meta : cf.getFieldNames()){
+//				System.out.println(meta + " " + cf.get);
+//			}
+//			for(FieldMetadata meta : cf.getFieldsMetadata()){
+//				System.out.println(meta.getName() + " " + meta.getType());
+//			}
+			System.out.println(cf.getColumnDefinitionList().size());
+			for(ColumnDefinition cd : cf.getColumnDefinitionList()){
+				System.out.println("---");
+				System.out.println(cd.getName() + " " + cd.getValidationClass());
 			}
 
 			
